@@ -27,6 +27,8 @@ object RemoteConfig {
     const val KEY_SPLASH_BG = "splash_bg_color"
     const val KEY_SPLASH_TEXT_COLOR = "splash_text_color"
     const val KEY_SPLASH_TEXT = "splash_text"
+    const val KEY_SPLASH_SHOW_ICON = "splash_show_icon"
+    const val KEY_SPLASH_DURATION_MS = "splash_duration_ms"
     const val KEY_FONT_NAME = "font_name"
 
     fun fetch(context: Context, onDone: (() -> Unit)? = null) {
@@ -61,6 +63,12 @@ object RemoteConfig {
                     parseColorOrNull(json.optString("splash_text_color"))
                         ?.let { editor.putInt(KEY_SPLASH_TEXT_COLOR, it) }
                     editor.putString(KEY_SPLASH_TEXT, json.optString("splash_text"))
+                    if (json.has("splash_show_icon")) {
+                        editor.putBoolean(KEY_SPLASH_SHOW_ICON, json.optBoolean("splash_show_icon", true))
+                    }
+                    if (json.has("splash_duration_ms")) {
+                        editor.putInt(KEY_SPLASH_DURATION_MS, json.optInt("splash_duration_ms", 2000))
+                    }
                     editor.putString(KEY_FONT_NAME, json.optString("font_name"))
                     editor.apply()
                 }

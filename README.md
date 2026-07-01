@@ -10,13 +10,23 @@ durumunu takip eder ve bitince dosyaları kullanıcının indirme alanına indir
 
 - E-posta/şifre ile **ve** Google ile kayıt/giriş
 - Kullanıcı başına en fazla **5 uygulama** (`.env` içinden değiştirilebilir)
-- Her uygulama için: isim, paket adı (otomatik), ikon, hedef web adresi,
-  üst bar rengi, açılış (splash) ekranı arka plan/metin/yazı rengi, yazı fontu
+- Her uygulama için: isim, paket adı (otomatik veya elle girilebilir, sonradan
+  değiştirilemez), ikon, hedef web adresi, durum çubuğu rengi, açılış (splash)
+  ekranı arka plan/metin/yazı rengi, ikon gösterme seçeneği, süresi (saniye),
+  yazı fontu
+- Hedef adres, renkler, splash metni/ikonu/süresi, font: **kaydettiğiniz anda**
+  kurulu uygulamalara yeniden derlemeye gerek kalmadan yansır (bkz. "Canlı
+  Yapılandırma" bölümü). Yalnızca uygulama adı ve ikonu değişikliği yeni bir
+  derleme gerektirir.
 - "Derle" butonu → GitHub Actions → imzalı APK + AAB → uygulamanın indirme alanı
 - Her uygulama için **tek bir imzalama anahtarı** ilk derlemede üretilir ve
   sonraki tüm sürümlerde otomatik olarak yeniden kullanılır (Play Store
   güncellemeleri için zorunludur — imzalama anahtarı değişirse güncelleme
   yayınlanamaz)
+- Üretilen uygulamalarda: harici linkler/tel:/mailto: linkleri sistem
+  tarayıcısına/uygulamasına yönlendirilir, dosya yükleme ve indirme desteği,
+  aşağı çekerek yenileme (pull-to-refresh), internet yokken düzgün bir hata
+  ekranı
 
 ## Klasör Yapısı
 
@@ -48,6 +58,13 @@ android-template/        Derlenecek Android (Kotlin) WebView proje şablonu (yal
 
 ```
 mysql -u kullanici -p veritabani_adi < database/schema.sql
+```
+
+Daha önce kurduğunuz bir veritabanını güncelliyorsanız (splash ikonu/süresi
+özelliği sonradan eklendi), tek seferlik şu migration'ı da çalıştırın:
+
+```
+mysql -u kullanici -p veritabani_adi < database/migrations/001_add_splash_options.sql
 ```
 
 ### 3. Ortam değişkenleri
@@ -114,6 +131,16 @@ geçici bir artifact olarak yükler; PHP bunu bir kere indirip veritabanında sa
 ve sonraki her "yeni sürüm derle" isteğinde aynı anahtarı workflow'a geri gönderir.
 **Bu anahtarı asla kaybetmeyin** — kaybolursa o uygulamanın güncellemesi Play
 Store'a yüklenemez, yalnızca tamamen yeni bir uygulama olarak yayınlanabilir.
+
+## Canlı Yapılandırma (yeniden derlemeden güncelleme)
+
+Kurulu her uygulama, her açılışında `/api/config/{package_id}` uç noktasını
+çağırıp hedef adres, renkler, splash metni/ikonu/süresi ve fontu çeker,
+cihazda önbelleğe alır. Panelden "Kaydet"e bastığınızda bir sonraki açılışta
+(genelde birkaç saniye içinde) tüm kurulu cihazlara yansır — yeni bir APK/AAB
+derlemenize gerek yoktur. Bu yüzden **uygulama adı** ve **ikonu** hariç
+panoldaki hemen her ayar anında etkilidir; adı/ikonu değiştirmek Android'in
+paket meta verisi olduğu için hâlâ yeni bir derleme gerektirir.
 
 ## Yazı Fontları
 

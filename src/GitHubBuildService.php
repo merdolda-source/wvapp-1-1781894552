@@ -59,6 +59,8 @@ final class GitHubBuildService
             'splash_bg_color' => $app['splash_bg_color'],
             'splash_text_color' => $app['splash_text_color'],
             'splash_text' => $app['splash_text'],
+            'splash_show_icon' => ((int) $app['splash_show_icon']) === 1 ? 'true' : 'false',
+            'splash_duration_ms' => (string) (((int) $app['splash_duration']) * 1000),
             'font_name' => $app['font_name'],
             'version_code' => (string) $app['version_code'],
             'version_name' => $app['version_name'],

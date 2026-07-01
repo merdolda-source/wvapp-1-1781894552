@@ -22,7 +22,84 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
         değerlerini ayarlayın.</div>
 <?php endif; ?>
 
-<div class="grid-2">
+<div class="tabs">
+    <button type="button" class="tab-btn active" data-tab="general">Genel</button>
+    <button type="button" class="tab-btn" data-tab="splash">Splash &amp; Görünüm</button>
+    <button type="button" class="tab-btn" data-tab="build">Derleme &amp; İndirme</button>
+</div>
+
+<form method="post" action="/apps/<?= (int) $app['id'] ?>/update" enctype="multipart/form-data" class="app-form">
+    <?= Csrf::field() ?>
+
+    <div class="tab-panel active" data-panel="general">
+        <div class="card">
+            <label>Uygulama Adı
+                <input type="text" name="name" required maxlength="50" value="<?= View::e($app['name']) ?>">
+            </label>
+
+            <label>Web Sitesi Adresi
+                <input type="url" name="target_url" required value="<?= View::e($app['target_url']) ?>">
+            </label>
+
+            <label>Paket Adı <span class="muted">(oluşturulduktan sonra değiştirilemez)</span>
+                <input type="text" value="<?= View::e($app['package_id']) ?>" disabled>
+            </label>
+
+            <label>Uygulama İkonu (değiştirmek için yeni dosya seçin)
+                <input type="file" name="icon" accept="image/png,image/jpeg">
+            </label>
+            <?php if ($app['icon_path']): ?>
+                <img class="icon-preview" src="/uploads/icons/<?= View::e($app['icon_path']) ?>" alt="">
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="tab-panel" data-panel="splash">
+        <div class="card">
+            <div class="color-grid">
+                <label>Durum Çubuğu Rengi
+                    <input type="color" name="header_color" value="<?= View::e($app['header_color']) ?>">
+                </label>
+                <label>Açılış Ekranı Arka Plan Rengi
+                    <input type="color" name="splash_bg_color" value="<?= View::e($app['splash_bg_color']) ?>">
+                </label>
+                <label>Açılış Ekranı Yazı Rengi
+                    <input type="color" name="splash_text_color" value="<?= View::e($app['splash_text_color']) ?>">
+                </label>
+            </div>
+
+            <label>Açılış Ekranı Metni
+                <input type="text" name="splash_text" maxlength="60" value="<?= View::e($app['splash_text']) ?>">
+            </label>
+
+            <label class="checkbox-label">
+                <input type="checkbox" name="splash_show_icon" value="1" <?= !empty($app['splash_show_icon']) ? 'checked' : '' ?>>
+                Açılış ekranında uygulama ikonunu göster
+            </label>
+
+            <label>Açılış Ekranı Süresi (saniye)
+                <input type="number" name="splash_duration" min="1" max="10" value="<?= (int) $app['splash_duration'] ?>">
+            </label>
+
+            <label>Yazı Fontu
+                <select name="font_name">
+                    <?php foreach ($fonts as $key => $font): ?>
+                        <option value="<?= View::e($key) ?>" <?= $key === $app['font_name'] ? 'selected' : '' ?>><?= View::e($font['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+
+            <p class="muted">Bu sayfadaki tüm ayarlar (web adresi hariç uygulama adı/ikonu) kaydettiğinizde
+                yeniden derlemeye gerek kalmadan kurulu uygulamalara birkaç saniye içinde yansır.</p>
+        </div>
+    </div>
+
+    <div class="tab-save-bar">
+        <button type="submit" class="btn">Kaydet</button>
+    </div>
+</form>
+
+<div class="tab-panel" data-panel="build">
     <div class="card">
         <h2>Derleme &amp; İndirme</h2>
         <form method="post" action="/apps/<?= (int) $app['id'] ?>/build">
@@ -67,60 +144,25 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
             </table>
         <?php endif; ?>
     </div>
-
-    <div class="card">
-        <h2>Ayarlar</h2>
-        <form method="post" action="/apps/<?= (int) $app['id'] ?>/update" enctype="multipart/form-data" class="app-form">
-            <?= Csrf::field() ?>
-
-            <label>Uygulama Adı
-                <input type="text" name="name" required maxlength="50" value="<?= View::e($app['name']) ?>">
-            </label>
-
-            <label>Web Sitesi Adresi
-                <input type="url" name="target_url" required value="<?= View::e($app['target_url']) ?>">
-            </label>
-
-            <label>Uygulama İkonu (değiştirmek için yeni dosya seçin)
-                <input type="file" name="icon" accept="image/png,image/jpeg">
-            </label>
-            <?php if ($app['icon_path']): ?>
-                <img class="icon-preview" src="/uploads/icons/<?= View::e($app['icon_path']) ?>" alt="">
-            <?php endif; ?>
-
-            <div class="color-grid">
-                <label>Durum Çubuğu Rengi
-                    <input type="color" name="header_color" value="<?= View::e($app['header_color']) ?>">
-                </label>
-                <label>Açılış Ekranı Arka Plan Rengi
-                    <input type="color" name="splash_bg_color" value="<?= View::e($app['splash_bg_color']) ?>">
-                </label>
-                <label>Açılış Ekranı Yazı Rengi
-                    <input type="color" name="splash_text_color" value="<?= View::e($app['splash_text_color']) ?>">
-                </label>
-            </div>
-
-            <label>Açılış Ekranı Metni
-                <input type="text" name="splash_text" maxlength="60" value="<?= View::e($app['splash_text']) ?>">
-            </label>
-
-            <label>Yazı Fontu
-                <select name="font_name">
-                    <?php foreach ($fonts as $key => $font): ?>
-                        <option value="<?= View::e($key) ?>" <?= $key === $app['font_name'] ? 'selected' : '' ?>><?= View::e($font['label']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-
-            <button type="submit" class="btn">Kaydet</button>
-        </form>
-
-        <form method="post" action="/apps/<?= (int) $app['id'] ?>/delete" class="delete-form" onsubmit="return confirm('Bu uygulamayı silmek istediğinize emin misiniz?');">
-            <?= Csrf::field() ?>
-            <button type="submit" class="link-button danger">Uygulamayı Sil</button>
-        </form>
-    </div>
 </div>
+
+<div class="card">
+    <form method="post" action="/apps/<?= (int) $app['id'] ?>/delete" class="delete-form" onsubmit="return confirm('Bu uygulamayı silmek istediğinize emin misiniz?');">
+        <?= Csrf::field() ?>
+        <button type="submit" class="link-button danger">Uygulamayı Sil</button>
+    </form>
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.querySelectorAll('[data-panel="' + btn.dataset.tab + '"]').forEach(function (p) { p.classList.add('active'); });
+    });
+});
+</script>
 
 <?php if (in_array($app['status'], ['queued', 'building'], true)): ?>
 <script>
