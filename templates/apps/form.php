@@ -22,7 +22,7 @@
     </label>
 
     <div class="color-grid">
-        <label>Üst Bar Rengi
+        <label>Durum Çubuğu Rengi
             <input type="color" name="header_color" value="#2563EB">
         </label>
         <label>Açılış Ekranı Arka Plan Rengi

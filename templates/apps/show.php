@@ -89,7 +89,7 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
             <?php endif; ?>
 
             <div class="color-grid">
-                <label>Üst Bar Rengi
+                <label>Durum Çubuğu Rengi
                     <input type="color" name="header_color" value="<?= View::e($app['header_color']) ?>">
                 </label>
                 <label>Açılış Ekranı Arka Plan Rengi

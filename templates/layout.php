@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>WebView App Builder</title>
-<link rel="stylesheet" href="/assets/css/style.css">
+<?php $cssVersion = @filemtime(BASE_PATH . '/assets/css/style.css') ?: time(); ?>
+<link rel="stylesheet" href="/assets/css/style.css?v=<?= $cssVersion ?>">
 </head>
 <body>
 <?php require TEMPLATES_PATH . '/partials/header.php'; ?>
