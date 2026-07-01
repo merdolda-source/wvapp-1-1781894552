@@ -1,6 +1,6 @@
 <header class="site-header">
     <div class="container header-inner">
-        <a class="brand" href="/">WebView App Builder</a>
+        <a class="brand" href="/">CreatorApp24</a>
         <nav>
             <?php if (Auth::check()): ?>
                 <a href="/dashboard">Panel</a>

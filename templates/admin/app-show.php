@@ -1,4 +1,5 @@
 <?php
+$noIndex = true;
 $statusLabels = [
     'draft' => 'Taslak',
     'queued' => 'Sırada',

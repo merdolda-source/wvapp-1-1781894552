@@ -1,3 +1,4 @@
+<?php $noIndex = true; ?>
 <section class="page-head">
     <h1>Yönetici Paneli <span class="admin-badge">ADMIN</span></h1>
 </section>

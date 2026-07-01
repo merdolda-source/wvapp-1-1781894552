@@ -1,4 +1,5 @@
 <?php
+$noIndex = true;
 $latestBuild = $builds[0] ?? null;
 $statusLabels = [
     'draft' => 'Taslak',

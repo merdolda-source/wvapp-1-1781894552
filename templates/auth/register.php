@@ -1,3 +1,7 @@
+<?php
+$pageTitle = 'Ücretsiz Kayıt Ol — CreatorApp24';
+$pageDescription = 'CreatorApp24\'e ücretsiz kayıt olun, web sitenizi Android uygulamasına dönüştürmeye hemen başlayın.';
+?>
 <section class="card auth-card">
     <h1>Kayıt Ol</h1>
 

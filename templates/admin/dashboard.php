@@ -1,4 +1,5 @@
 <?php
+$noIndex = true;
 $dailyMax = 1;
 foreach ($daily as $row) {
     $dailyMax = max($dailyMax, (int) $row['total']);
