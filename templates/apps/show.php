@@ -3,11 +3,11 @@ $latestBuild = $builds[0] ?? null;
 $statusLabels = [
     'draft' => 'Taslak',
     'queued' => 'Sırada',
-    'building' => 'Derleniyor',
+    'building' => 'Yayınlanıyor',
     'ready' => 'Hazır',
     'failed' => 'Başarısız',
 ];
-$buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yeni Sürüm Derle' : 'Derlemeyi Başlat';
+$buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yeni Sürüm Yayınla' : 'Yayınlamayı Başlat';
 ?>
 
 <section class="page-head">
@@ -17,15 +17,14 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
 <p class="muted"><?= View::e($app['package_id']) ?> &middot; sürüm <span id="app-version-name"><?= View::e($app['version_name']) ?></span> (kod <?= (int) $app['version_code'] ?>)</p>
 
 <?php if (!$githubConfigured): ?>
-    <div class="alert alert-error">GitHub bağlantısı henüz yapılandırılmadı. Derleme başlatmak için sunucudaki
-        <code>.env</code> dosyasında <code>GITHUB_TOKEN</code>, <code>GITHUB_OWNER</code> ve <code>GITHUB_REPO</code>
-        değerlerini ayarlayın.</div>
+    <div class="alert alert-error">Yayınlama sistemi henüz yapılandırılmadı. Lütfen sunucudaki
+        <code>.env</code> dosyasındaki API ayarlarını tamamlayın.</div>
 <?php endif; ?>
 
 <div class="tabs">
     <button type="button" class="tab-btn active" data-tab="general">Genel</button>
     <button type="button" class="tab-btn" data-tab="splash">Splash &amp; Görünüm</button>
-    <button type="button" class="tab-btn" data-tab="build">Derleme &amp; İndirme</button>
+    <button type="button" class="tab-btn" data-tab="build">Yayınla &amp; İndir</button>
 </div>
 
 <form method="post" action="/apps/<?= (int) $app['id'] ?>/update" enctype="multipart/form-data" class="app-form">
@@ -51,6 +50,11 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
             <?php if ($app['icon_path']): ?>
                 <img class="icon-preview" src="/uploads/icons/<?= View::e($app['icon_path']) ?>" alt="">
             <?php endif; ?>
+
+            <label>Gizlilik Politikası Linki <span class="muted">(Play Store mağaza kaydınıza ekleyin)</span>
+                <input type="text" readonly onclick="this.select()"
+                    value="<?= View::e(rtrim((string) Config::get('APP_URL'), '/')) ?>/privacy/<?= View::e($app['package_id']) ?>">
+            </label>
         </div>
     </div>
 
@@ -89,8 +93,9 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
                 </select>
             </label>
 
-            <p class="muted">Bu sayfadaki tüm ayarlar (web adresi hariç uygulama adı/ikonu) kaydettiğinizde
-                yeniden derlemeye gerek kalmadan kurulu uygulamalara birkaç saniye içinde yansır.</p>
+            <p class="muted">Web adresi, renkler, splash metni/ikonu/süresi ve font kaydettiğiniz anda
+                birkaç saniye içinde kurulu uygulamalara yansır. Yalnızca uygulama adı veya ikonunu
+                değiştirirseniz yeni bir sürüm yayınlamanız gerekir.</p>
         </div>
     </div>
 
@@ -101,7 +106,7 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
 
 <div class="tab-panel" data-panel="build">
     <div class="card">
-        <h2>Derleme &amp; İndirme</h2>
+        <h2>Yayınla &amp; İndir</h2>
         <form method="post" action="/apps/<?= (int) $app['id'] ?>/build">
             <?= Csrf::field() ?>
             <button type="submit" class="btn" <?= (!$githubConfigured || in_array($app['status'], ['queued', 'building'], true)) ? 'disabled' : '' ?>>
@@ -110,19 +115,19 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
         </form>
 
         <div id="build-progress" style="<?= in_array($app['status'], ['queued', 'building'], true) ? '' : 'display:none' ?>">
-            <p class="muted">Derleme sürüyor, bu sayfa otomatik olarak güncellenecek…</p>
+            <p class="muted">Yayınlanıyor, bu sayfa otomatik olarak güncellenecek…</p>
         </div>
 
         <div id="download-links" style="<?= $app['status'] === 'ready' ? '' : 'display:none' ?>">
             <?php if ($app['status'] === 'ready'): ?>
-                <a class="btn btn-secondary" href="/apps/<?= (int) $app['id'] ?>/download/apk">APK İndir</a>
-                <a class="btn btn-secondary" href="/apps/<?= (int) $app['id'] ?>/download/aab">AAB İndir (Play Store)</a>
+                <a class="btn btn-success" href="/apps/<?= (int) $app['id'] ?>/download/apk">APK İndir</a>
+                <a class="btn btn-success" href="/apps/<?= (int) $app['id'] ?>/download/aab">AAB İndir (Play Store)</a>
             <?php endif; ?>
         </div>
 
         <h3>Sürüm Geçmişi</h3>
         <?php if (empty($builds)): ?>
-            <p class="muted">Henüz derleme yapılmadı.</p>
+            <p class="muted">Henüz bir sürüm yayınlanmadı.</p>
         <?php else: ?>
             <table class="table">
                 <thead><tr><th>Sürüm</th><th>Durum</th><th>Tarih</th><th></th></tr></thead>
@@ -134,8 +139,8 @@ $buildLabel = ($app['status'] === 'ready' || $app['status'] === 'failed') ? 'Yen
                         <td><?= View::e($build['created_at']) ?></td>
                         <td>
                             <?php if ($build['status'] === 'success'): ?>
-                                <a href="/apps/<?= (int) $app['id'] ?>/download/apk">APK</a> ·
-                                <a href="/apps/<?= (int) $app['id'] ?>/download/aab">AAB</a>
+                                <a class="download-link" href="/apps/<?= (int) $app['id'] ?>/download/apk">APK</a> ·
+                                <a class="download-link" href="/apps/<?= (int) $app['id'] ?>/download/aab">AAB</a>
                             <?php endif; ?>
                         </td>
                     </tr>

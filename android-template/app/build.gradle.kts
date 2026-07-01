@@ -17,7 +17,10 @@ android {
         versionName = env("APP_VERSION_NAME", "1.0.0")
 
         resValue("string", "app_name", env("APP_NAME", "WebView App"))
-        resValue("string", "target_url", env("APP_TARGET_URL", "https://www.google.com"))
+        // Only a generic placeholder here - the real target URL is fetched at
+        // runtime from config_base_url (see RemoteConfig.kt) and is normally
+        // already cached before this is ever used.
+        resValue("string", "target_url", env("APP_TARGET_URL", "about:blank"))
         resValue("string", "splash_text", env("APP_SPLASH_TEXT", ""))
         resValue("string", "splash_font", env("APP_FONT_NAME", ""))
         resValue("bool", "splash_show_icon", env("APP_SPLASH_SHOW_ICON", "true"))
