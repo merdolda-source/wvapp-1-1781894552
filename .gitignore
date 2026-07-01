@@ -1,7 +1,8 @@
-*.iml
-.gradle
-/local.properties
-/.idea
+.env
+/public/uploads/icons/*
+!/public/uploads/icons/.gitkeep
+/storage/builds/*
+!/storage/builds/.gitkeep
 .DS_Store
-/build
-keystore/
+*.log
+/vendor/
