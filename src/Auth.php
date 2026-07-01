@@ -41,4 +41,25 @@ final class Auth
             exit;
         }
     }
+
+    public static function isAdmin(): bool
+    {
+        $adminEmail = trim((string) Config::get('ADMIN_EMAIL'));
+        if ($adminEmail === '') {
+            return false;
+        }
+
+        $user = self::user();
+        return $user !== null && strcasecmp(trim($user['email']), $adminEmail) === 0;
+    }
+
+    public static function requireAdmin(): void
+    {
+        self::requireLogin();
+        if (!self::isAdmin()) {
+            http_response_code(404);
+            View::render('errors/404', []);
+            exit;
+        }
+    }
 }

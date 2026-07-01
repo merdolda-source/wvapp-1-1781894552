@@ -4,6 +4,12 @@
         <nav>
             <?php if (Auth::check()): ?>
                 <a href="/dashboard">Panel</a>
+                <a href="/stats/downloads">İndirmeler</a>
+                <a href="/stats/usage">Kullanım</a>
+                <a href="/account">Hesabım</a>
+                <?php if (Auth::isAdmin()): ?>
+                    <a href="/admin">Admin</a>
+                <?php endif; ?>
                 <form action="/logout" method="post" class="inline-form">
                     <?= Csrf::field() ?>
                     <button type="submit" class="link-button">Çıkış Yap</button>

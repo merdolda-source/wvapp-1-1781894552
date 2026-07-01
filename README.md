@@ -26,7 +26,13 @@ durumunu takip eder ve bitince dosyaları kullanıcının indirme alanına indir
 - Üretilen uygulamalarda: harici linkler/tel:/mailto: linkleri sistem
   tarayıcısına/uygulamasına yönlendirilir, dosya yükleme ve indirme desteği,
   aşağı çekerek yenileme (pull-to-refresh), internet yokken düzgün bir hata
-  ekranı
+  ekranı, her uygulama için otomatik oluşturulan bir gizlilik politikası
+  sayfası (Play Store mağaza kaydına eklenebilir)
+- Kullanıcılar için **Hesabım** sayfası (ad düzenleme, şifre değiştirme) ve
+  **İstatistikler** (günlük indirmeler, aylık kullanım/açılma sayısı)
+- Site sahibi için gizli bir **/admin** paneli: tüm kullanıcılar, tüm
+  uygulamalar (düzenleme/silme), platform geneli istatistikler
+  (`ADMIN_EMAIL` ile açılır)
 
 ## Klasör Yapısı
 
@@ -60,11 +66,12 @@ android-template/        Derlenecek Android (Kotlin) WebView proje şablonu (yal
 mysql -u kullanici -p veritabani_adi < database/schema.sql
 ```
 
-Daha önce kurduğunuz bir veritabanını güncelliyorsanız (splash ikonu/süresi
-özelliği sonradan eklendi), tek seferlik şu migration'ı da çalıştırın:
+Daha önce kurduğunuz bir veritabanını güncelliyorsanız, tek seferlik şu
+migration'ları da (varsa) çalıştırın:
 
 ```
 mysql -u kullanici -p veritabani_adi < database/migrations/001_add_splash_options.sql
+mysql -u kullanici -p veritabani_adi < database/migrations/002_add_stats_tables.sql
 ```
 
 ### 3. Ortam değişkenleri
@@ -79,6 +86,9 @@ cp .env.example .env
 - `APP_URL` → sitenizin herkese açık adresi (ikon dosyalarının GitHub Actions
   tarafından indirilebilmesi için **herkese açık** olmalıdır)
 - `APP_MAX_APPS_PER_USER` → kullanıcı başına izin verilen uygulama sayısı (varsayılan 5)
+- `ADMIN_EMAIL` → bu e-postayla giriş yapan hesap gizli `/admin` panelini görür
+  (tüm kullanıcılar, tüm uygulamalar, platform geneli istatistikler). Boş
+  bırakılırsa `/admin` kimseye açılmaz.
 
 ### 4. GitHub bağlantısı (derleme için zorunlu)
 
