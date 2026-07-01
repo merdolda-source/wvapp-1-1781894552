@@ -37,6 +37,15 @@
         <input type="text" name="splash_text" maxlength="60" placeholder="Örn: Hoş Geldiniz">
     </label>
 
+    <label class="checkbox-label">
+        <input type="checkbox" name="splash_show_icon" value="1" checked>
+        Açılış ekranında uygulama ikonunu göster
+    </label>
+
+    <label>Açılış Ekranı Süresi (saniye)
+        <input type="number" name="splash_duration" min="1" max="10" value="2">
+    </label>
+
     <label>Yazı Fontu
         <select name="font_name">
             <?php foreach ($fonts as $key => $font): ?>

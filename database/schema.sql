@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS apps (
     splash_bg_color     VARCHAR(9)          NOT NULL DEFAULT '#2563EB',
     splash_text_color   VARCHAR(9)          NOT NULL DEFAULT '#FFFFFF',
     splash_text         VARCHAR(120)        NOT NULL DEFAULT '',
+    splash_show_icon    TINYINT(1)          NOT NULL DEFAULT 1,
+    splash_duration     TINYINT UNSIGNED    NOT NULL DEFAULT 2,
     font_name           VARCHAR(60)         NOT NULL DEFAULT 'default',
     version_code        INT UNSIGNED        NOT NULL DEFAULT 0,
     version_name        VARCHAR(30)         NOT NULL DEFAULT '1.0.0',

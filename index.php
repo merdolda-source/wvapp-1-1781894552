@@ -384,6 +384,8 @@ $router->get('/api/config/{packageId}', function (string $packageId): void {
         'splash_bg_color' => $app['splash_bg_color'],
         'splash_text_color' => $app['splash_text_color'],
         'splash_text' => $app['splash_text'],
+        'splash_show_icon' => (bool) $app['splash_show_icon'],
+        'splash_duration_ms' => ((int) $app['splash_duration']) * 1000,
         'font_name' => $app['font_name'],
         'version_name' => $app['version_name'],
     ]);
@@ -401,6 +403,8 @@ function validate_app_input(array $input, bool $requirePackageCheck = true): arr
     $splashBg = trim($input['splash_bg_color'] ?? '#2563EB');
     $splashTextColor = trim($input['splash_text_color'] ?? '#FFFFFF');
     $splashText = trim($input['splash_text'] ?? '');
+    $splashShowIcon = !empty($input['splash_show_icon']) ? 1 : 0;
+    $splashDuration = (int) ($input['splash_duration'] ?? 2);
     $fontName = trim($input['font_name'] ?? 'default');
 
     if (mb_strlen($name) < 2 || mb_strlen($name) > 50) {
@@ -427,6 +431,10 @@ function validate_app_input(array $input, bool $requirePackageCheck = true): arr
         $errors[] = 'Açılış ekranı metni en fazla 60 karakter olabilir.';
     }
 
+    if ($splashDuration < 1 || $splashDuration > 10) {
+        $errors[] = 'Açılış ekranı süresi 1-10 saniye arasında olmalıdır.';
+    }
+
     return [[
         'name' => $name,
         'target_url' => $targetUrl,
@@ -434,6 +442,8 @@ function validate_app_input(array $input, bool $requirePackageCheck = true): arr
         'splash_bg_color' => strtoupper($splashBg),
         'splash_text_color' => strtoupper($splashTextColor),
         'splash_text' => $splashText,
+        'splash_show_icon' => $splashShowIcon,
+        'splash_duration' => max(1, min(10, $splashDuration)),
         'font_name' => $fontName,
         'version_name' => '1.0.0',
     ], $errors];

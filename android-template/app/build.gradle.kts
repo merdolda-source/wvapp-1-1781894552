@@ -20,6 +20,8 @@ android {
         resValue("string", "target_url", env("APP_TARGET_URL", "https://www.google.com"))
         resValue("string", "splash_text", env("APP_SPLASH_TEXT", ""))
         resValue("string", "splash_font", env("APP_FONT_NAME", ""))
+        resValue("bool", "splash_show_icon", env("APP_SPLASH_SHOW_ICON", "true"))
+        resValue("integer", "splash_duration_ms", env("APP_SPLASH_DURATION_MS", "2000"))
         resValue("color", "header_color", env("APP_HEADER_COLOR", "#2563EB"))
         resValue("color", "splash_bg_color", env("APP_SPLASH_BG_COLOR", "#2563EB"))
         resValue("color", "splash_text_color", env("APP_SPLASH_TEXT_COLOR", "#FFFFFF"))
@@ -67,4 +69,5 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.splashscreen)
     implementation(libs.androidx.webkit)
+    implementation(libs.androidx.swiperefreshlayout)
 }

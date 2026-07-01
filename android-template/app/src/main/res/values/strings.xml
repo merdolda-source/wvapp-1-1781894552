@@ -2,4 +2,7 @@
 <resources>
     <!-- app_name / target_url / splash_text / splash_font are injected at build
          time via resValue() in app/build.gradle.kts. -->
+    <string name="offline_title">İnternet bağlantısı yok</string>
+    <string name="offline_message">Lütfen bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="offline_retry">Tekrar Dene</string>
 </resources>

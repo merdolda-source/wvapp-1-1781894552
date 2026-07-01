@@ -54,9 +54,9 @@ final class AppProject
         $stmt = Database::connection()->prepare(
             'INSERT INTO apps
                 (user_id, name, package_id, target_url, icon_path, header_color, splash_bg_color,
-                 splash_text_color, splash_text, font_name, version_code, version_name,
-                 key_alias, key_password, store_password, status)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                 splash_text_color, splash_text, splash_show_icon, splash_duration, font_name,
+                 version_code, version_name, key_alias, key_password, store_password, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
 
         $stmt->execute([
@@ -69,6 +69,8 @@ final class AppProject
             $fields['splash_bg_color'],
             $fields['splash_text_color'],
             $fields['splash_text'],
+            $fields['splash_show_icon'] ?? 1,
+            $fields['splash_duration'] ?? 2,
             $fields['font_name'],
             1,
             $fields['version_name'] ?? '1.0.0',
@@ -85,7 +87,7 @@ final class AppProject
     {
         $columns = [];
         $values = [];
-        foreach (['name', 'target_url', 'icon_path', 'header_color', 'splash_bg_color', 'splash_text_color', 'splash_text', 'font_name'] as $column) {
+        foreach (['name', 'target_url', 'icon_path', 'header_color', 'splash_bg_color', 'splash_text_color', 'splash_text', 'splash_show_icon', 'splash_duration', 'font_name'] as $column) {
             if (array_key_exists($column, $fields)) {
                 $columns[] = "{$column} = ?";
                 $values[] = $fields[$column];

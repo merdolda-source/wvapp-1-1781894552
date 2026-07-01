@@ -41,6 +41,14 @@ on:
         description: "Splash screen text"
         required: false
         default: ""
+      splash_show_icon:
+        description: "Show the app icon on the splash screen (true/false)"
+        required: false
+        default: "true"
+      splash_duration_ms:
+        description: "How long the splash screen stays visible, in milliseconds"
+        required: false
+        default: "2000"
       font_name:
         description: "One of: default, opensans, montserrat, poppins, lobster, playfair, nunito"
         required: false
@@ -160,6 +168,8 @@ jobs:
           APP_SPLASH_BG_COLOR: ${{ inputs.splash_bg_color }}
           APP_SPLASH_TEXT_COLOR: ${{ inputs.splash_text_color }}
           APP_SPLASH_TEXT: ${{ inputs.splash_text }}
+          APP_SPLASH_SHOW_ICON: ${{ inputs.splash_show_icon }}
+          APP_SPLASH_DURATION_MS: ${{ inputs.splash_duration_ms }}
           APP_FONT_NAME: ${{ inputs.font_name == 'default' && '' || inputs.font_name }}
           APP_VERSION_CODE: ${{ inputs.version_code }}
           APP_VERSION_NAME: ${{ inputs.version_name }}
@@ -178,6 +188,8 @@ jobs:
           APP_SPLASH_BG_COLOR: ${{ inputs.splash_bg_color }}
           APP_SPLASH_TEXT_COLOR: ${{ inputs.splash_text_color }}
           APP_SPLASH_TEXT: ${{ inputs.splash_text }}
+          APP_SPLASH_SHOW_ICON: ${{ inputs.splash_show_icon }}
+          APP_SPLASH_DURATION_MS: ${{ inputs.splash_duration_ms }}
           APP_FONT_NAME: ${{ inputs.font_name == 'default' && '' || inputs.font_name }}
           APP_VERSION_CODE: ${{ inputs.version_code }}
           APP_VERSION_NAME: ${{ inputs.version_name }}
