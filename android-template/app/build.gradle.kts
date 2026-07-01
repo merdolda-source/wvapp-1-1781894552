@@ -23,6 +23,10 @@ android {
         resValue("color", "header_color", env("APP_HEADER_COLOR", "#2563EB"))
         resValue("color", "splash_bg_color", env("APP_SPLASH_BG_COLOR", "#2563EB"))
         resValue("color", "splash_text_color", env("APP_SPLASH_TEXT_COLOR", "#FFFFFF"))
+        // Base URL of the WebView App Builder site this app was generated from.
+        // Used at runtime to fetch the latest target URL/colors/splash text/font
+        // (see RemoteConfig.kt) so those can be changed without a new release.
+        resValue("string", "config_base_url", env("APP_CONFIG_BASE_URL", ""))
     }
 
     signingConfigs {

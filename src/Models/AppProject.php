@@ -34,6 +34,14 @@ final class AppProject
         return $app ?: null;
     }
 
+    public static function findByPackageId(string $packageId): ?array
+    {
+        $stmt = Database::connection()->prepare('SELECT * FROM apps WHERE package_id = ?');
+        $stmt->execute([$packageId]);
+        $app = $stmt->fetch();
+        return $app ?: null;
+    }
+
     public static function packageIdExists(string $packageId): bool
     {
         $stmt = Database::connection()->prepare('SELECT COUNT(*) FROM apps WHERE package_id = ?');

@@ -184,15 +184,28 @@ $router->post('/apps', function (): void {
 
     [$fields, $errors] = validate_app_input($_POST);
 
+    $customPackageId = trim($_POST['package_id'] ?? '');
+    if ($customPackageId !== '') {
+        if (!preg_match('/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/', $customPackageId)) {
+            $errors[] = 'Paket adı "com.siteniz.uygulama" biçiminde, küçük harflerle, en az iki bölümden oluşmalıdır.';
+        } elseif (AppProject::packageIdExists($customPackageId)) {
+            $errors[] = 'Bu paket adı zaten kullanılıyor, başka bir tane seçin.';
+        }
+    }
+
     if (!empty($errors)) {
         Flash::set('error', implode(' ', $errors));
         header('Location: /apps/new');
         exit;
     }
 
-    $fields['package_id'] = AppProject::suggestPackageId($fields['name']);
-    while (AppProject::packageIdExists($fields['package_id'])) {
+    if ($customPackageId !== '') {
+        $fields['package_id'] = $customPackageId;
+    } else {
         $fields['package_id'] = AppProject::suggestPackageId($fields['name']);
+        while (AppProject::packageIdExists($fields['package_id'])) {
+            $fields['package_id'] = AppProject::suggestPackageId($fields['name']);
+        }
     }
 
     $fields['icon_path'] = handle_icon_upload();
@@ -346,6 +359,34 @@ $router->post('/apps/{id}/delete', function (string $id): void {
 
     header('Location: /dashboard');
     exit;
+});
+
+// ---------------------------------------------------------------- Public config API (called by installed apps)
+
+// No login required: every installed app calls this on startup with its own
+// package name to pick up the latest target URL / colors / splash text /
+// font without needing a rebuild. Only non-secret display fields are
+// returned - never signing keys, tokens or user data.
+$router->get('/api/config/{packageId}', function (string $packageId): void {
+    header('Content-Type: application/json');
+
+    $app = AppProject::findByPackageId($packageId);
+
+    if ($app === null) {
+        http_response_code(404);
+        echo json_encode(['error' => 'not_found']);
+        return;
+    }
+
+    echo json_encode([
+        'target_url' => $app['target_url'],
+        'header_color' => $app['header_color'],
+        'splash_bg_color' => $app['splash_bg_color'],
+        'splash_text_color' => $app['splash_text_color'],
+        'splash_text' => $app['splash_text'],
+        'font_name' => $app['font_name'],
+        'version_name' => $app['version_name'],
+    ]);
 });
 
 // ---------------------------------------------------------------- Helpers

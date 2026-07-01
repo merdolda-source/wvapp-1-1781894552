@@ -13,6 +13,10 @@
         <input type="url" name="target_url" required placeholder="https://www.siteniz.com">
     </label>
 
+    <label>Paket Adı <span class="muted">(boş bırakılırsa otomatik oluşturulur, sonradan değiştirilemez)</span>
+        <input type="text" name="package_id" pattern="[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+" placeholder="com.siteniz.uygulama">
+    </label>
+
     <label>Uygulama İkonu (PNG/JPG, kare önerilir)
         <input type="file" name="icon" accept="image/png,image/jpeg">
     </label>
