@@ -48,4 +48,32 @@ final class User
     {
         return $user['password_hash'] !== null && password_verify($password, $user['password_hash']);
     }
+
+    public static function updateName(int $id, string $name): void
+    {
+        Database::connection()->prepare('UPDATE users SET name = ? WHERE id = ?')->execute([$name, $id]);
+    }
+
+    public static function updatePassword(int $id, string $newPassword): void
+    {
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        Database::connection()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([$hash, $id]);
+    }
+
+    public static function count(): int
+    {
+        return (int) Database::connection()->query('SELECT COUNT(*) FROM users')->fetchColumn();
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public static function allWithAppCounts(): array
+    {
+        $sql = 'SELECT u.*, COUNT(a.id) AS app_count
+                FROM users u
+                LEFT JOIN apps a ON a.user_id = u.id
+                GROUP BY u.id
+                ORDER BY u.created_at DESC';
+
+        return Database::connection()->query($sql)->fetchAll();
+    }
 }

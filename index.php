@@ -353,6 +353,8 @@ $router->get('/apps/{id}/download/{type}', function (string $id, string $type): 
         exit('Dosya bulunamadı');
     }
 
+    DownloadLog::log((int) $app['id'], $type);
+
     header('Content-Type: application/octet-stream');
     header('Content-Disposition: attachment; filename="' . basename($fullPath) . '"');
     header('Content-Length: ' . filesize($fullPath));
@@ -374,6 +376,178 @@ $router->post('/apps/{id}/delete', function (string $id): void {
     exit;
 });
 
+// ---------------------------------------------------------------- Account
+
+$router->get('/account', function (): void {
+    Auth::requireLogin();
+    View::render('account', ['user' => Auth::user()]);
+});
+
+$router->post('/account/update', function (): void {
+    Auth::requireLogin();
+    $user = Auth::user();
+
+    if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
+        header('Location: /account');
+        exit;
+    }
+
+    $name = trim($_POST['name'] ?? '');
+    if (mb_strlen($name) < 2 || mb_strlen($name) > 120) {
+        Flash::set('error', 'Ad 2-120 karakter olmalıdır.');
+        header('Location: /account');
+        exit;
+    }
+
+    User::updateName((int) $user['id'], $name);
+    Flash::set('success', 'Ad güncellendi.');
+    header('Location: /account');
+    exit;
+});
+
+$router->post('/account/password', function (): void {
+    Auth::requireLogin();
+    $user = Auth::user();
+
+    if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
+        header('Location: /account');
+        exit;
+    }
+
+    $current = (string) ($_POST['current_password'] ?? '');
+    $new = (string) ($_POST['new_password'] ?? '');
+    $confirm = (string) ($_POST['confirm_password'] ?? '');
+
+    if ($user['password_hash'] !== null && !User::verifyPassword($user, $current)) {
+        Flash::set('error', 'Mevcut şifre yanlış.');
+        header('Location: /account');
+        exit;
+    }
+
+    if (strlen($new) < 6) {
+        Flash::set('error', 'Yeni şifre en az 6 karakter olmalıdır.');
+        header('Location: /account');
+        exit;
+    }
+
+    if ($new !== $confirm) {
+        Flash::set('error', 'Yeni şifreler eşleşmiyor.');
+        header('Location: /account');
+        exit;
+    }
+
+    User::updatePassword((int) $user['id'], $new);
+    Flash::set('success', 'Şifre güncellendi.');
+    header('Location: /account');
+    exit;
+});
+
+// ---------------------------------------------------------------- Stats (own apps)
+
+$router->get('/stats/downloads', function (): void {
+    Auth::requireLogin();
+    $user = Auth::user();
+
+    View::render('stats/downloads', [
+        'daily' => DownloadLog::dailyForUser((int) $user['id'], 30),
+        'total' => DownloadLog::totalForUser((int) $user['id']),
+    ]);
+});
+
+$router->get('/stats/usage', function (): void {
+    Auth::requireLogin();
+    $user = Auth::user();
+
+    View::render('stats/usage', [
+        'monthly' => UsageLog::monthlyForUser((int) $user['id'], 12),
+        'total' => UsageLog::totalForUser((int) $user['id']),
+    ]);
+});
+
+// ---------------------------------------------------------------- Admin (hidden, owner only)
+
+$router->get('/admin', function (): void {
+    Auth::requireAdmin();
+
+    View::render('admin/dashboard', [
+        'userCount' => User::count(),
+        'appCount' => AppProject::countAll(),
+        'downloadTotal' => DownloadLog::totalGlobal(),
+        'usageTotal' => UsageLog::totalGlobal(),
+        'usageToday' => UsageLog::todayGlobal(),
+        'daily' => DownloadLog::dailyGlobal(30),
+        'monthly' => UsageLog::monthlyGlobal(12),
+    ]);
+});
+
+$router->get('/admin/users', function (): void {
+    Auth::requireAdmin();
+    View::render('admin/users', ['users' => User::allWithAppCounts()]);
+});
+
+$router->get('/admin/apps', function (): void {
+    Auth::requireAdmin();
+    View::render('admin/apps', ['apps' => AppProject::allWithOwners()]);
+});
+
+$router->get('/admin/apps/{id}', function (string $id): void {
+    Auth::requireAdmin();
+    $app = AppProject::find((int) $id);
+
+    if ($app === null) {
+        http_response_code(404);
+        View::render('errors/404', []);
+        return;
+    }
+
+    View::render('admin/app-show', [
+        'app' => $app,
+        'fonts' => Fonts::OPTIONS,
+        'builds' => Build::historyForApp((int) $app['id']),
+    ]);
+});
+
+$router->post('/admin/apps/{id}/update', function (string $id): void {
+    Auth::requireAdmin();
+    $app = AppProject::find((int) $id);
+
+    if ($app === null || !Csrf::verify($_POST['csrf_token'] ?? null)) {
+        header('Location: /admin/apps');
+        exit;
+    }
+
+    [$fields, $errors] = validate_app_input($_POST, requirePackageCheck: false);
+
+    if (!empty($errors)) {
+        Flash::set('error', implode(' ', $errors));
+        header('Location: /admin/apps/' . $app['id']);
+        exit;
+    }
+
+    $newIcon = handle_icon_upload();
+    if ($newIcon !== null) {
+        $fields['icon_path'] = $newIcon;
+    }
+
+    AppProject::update((int) $app['id'], $fields);
+    Flash::set('success', 'Ayarlar kaydedildi.');
+    header('Location: /admin/apps/' . $app['id']);
+    exit;
+});
+
+$router->post('/admin/apps/{id}/delete', function (string $id): void {
+    Auth::requireAdmin();
+    $app = AppProject::find((int) $id);
+
+    if ($app !== null && Csrf::verify($_POST['csrf_token'] ?? null)) {
+        AppProject::delete((int) $app['id']);
+        Flash::set('success', 'Uygulama silindi.');
+    }
+
+    header('Location: /admin/apps');
+    exit;
+});
+
 // ---------------------------------------------------------------- Public config API (called by installed apps)
 
 // No login required: every installed app calls this on startup with its own
@@ -390,6 +564,8 @@ $router->get('/api/config/{packageId}', function (string $packageId): void {
         echo json_encode(['error' => 'not_found']);
         return;
     }
+
+    UsageLog::log((int) $app['id']);
 
     echo json_encode([
         'target_url' => $app['target_url'],

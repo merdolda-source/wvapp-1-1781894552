@@ -52,3 +52,23 @@ CREATE TABLE IF NOT EXISTS builds (
     updated_at      DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_builds_app FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- One row per APK/AAB download click, used for the daily downloads chart.
+CREATE TABLE IF NOT EXISTS download_logs (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    app_id      INT UNSIGNED    NOT NULL,
+    type        ENUM('apk','aab') NOT NULL,
+    created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_download_logs_app FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+    INDEX idx_download_logs_app_date (app_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- One row every time an installed app calls /api/config on launch, used for
+-- the monthly active-usage chart.
+CREATE TABLE IF NOT EXISTS usage_logs (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    app_id      INT UNSIGNED    NOT NULL,
+    created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_usage_logs_app FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+    INDEX idx_usage_logs_app_date (app_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

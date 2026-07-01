@@ -18,6 +18,22 @@ final class AppProject
         return $stmt->fetchAll();
     }
 
+    public static function countAll(): int
+    {
+        return (int) Database::connection()->query('SELECT COUNT(*) FROM apps')->fetchColumn();
+    }
+
+    /** @return array<int, array<string, mixed>> All apps with their owner's name/email, newest first. */
+    public static function allWithOwners(): array
+    {
+        $sql = 'SELECT a.*, u.name AS owner_name, u.email AS owner_email
+                FROM apps a
+                INNER JOIN users u ON u.id = a.user_id
+                ORDER BY a.created_at DESC';
+
+        return Database::connection()->query($sql)->fetchAll();
+    }
+
     public static function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare('SELECT * FROM apps WHERE id = ?');
