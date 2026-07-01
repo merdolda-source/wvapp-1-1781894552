@@ -78,6 +78,12 @@ jobs:
         with:
           gradle-version: "8.7"
 
+      - name: Mask signing secrets in logs
+        run: |
+          echo "::add-mask::${{ inputs.key_alias }}"
+          echo "::add-mask::${{ inputs.key_password }}"
+          echo "::add-mask::${{ inputs.store_password }}"
+
       - name: Prepare keystore (reuse existing or generate once)
         run: |
           mkdir -p keystore
