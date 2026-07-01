@@ -17,6 +17,10 @@ on:
       target_url:
         description: "Website URL to load inside the WebView"
         required: true
+      config_base_url:
+        description: "Base URL of the WebView App Builder site (used at runtime to fetch live config updates)"
+        required: false
+        default: ""
       icon_url:
         description: "Publicly reachable URL of the app icon (PNG/JPG). Empty = keep placeholder icon."
         required: false
@@ -139,6 +143,7 @@ jobs:
           APP_PACKAGE_ID: ${{ inputs.package_id }}
           APP_NAME: ${{ inputs.app_name }}
           APP_TARGET_URL: ${{ inputs.target_url }}
+          APP_CONFIG_BASE_URL: ${{ inputs.config_base_url }}
           APP_HEADER_COLOR: ${{ inputs.header_color }}
           APP_SPLASH_BG_COLOR: ${{ inputs.splash_bg_color }}
           APP_SPLASH_TEXT_COLOR: ${{ inputs.splash_text_color }}
@@ -156,6 +161,7 @@ jobs:
           APP_PACKAGE_ID: ${{ inputs.package_id }}
           APP_NAME: ${{ inputs.app_name }}
           APP_TARGET_URL: ${{ inputs.target_url }}
+          APP_CONFIG_BASE_URL: ${{ inputs.config_base_url }}
           APP_HEADER_COLOR: ${{ inputs.header_color }}
           APP_SPLASH_BG_COLOR: ${{ inputs.splash_bg_color }}
           APP_SPLASH_TEXT_COLOR: ${{ inputs.splash_text_color }}

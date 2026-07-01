@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,9 +21,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val prefs = getSharedPreferences(RemoteConfig.PREFS_NAME, MODE_PRIVATE)
+        val headerColor = prefs.getInt(RemoteConfig.KEY_HEADER_COLOR, ContextCompat.getColor(this, R.color.header_color))
+        val targetUrl = prefs.getString(RemoteConfig.KEY_TARGET_URL, null)?.takeIf { it.isNotBlank() }
+            ?: getString(R.string.target_url)
+
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.title = getString(R.string.app_name)
+        toolbar.setBackgroundColor(headerColor)
         setSupportActionBar(toolbar)
+        window.statusBarColor = headerColor
 
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
         webView = findViewById(R.id.webView)
@@ -34,6 +42,10 @@ class MainActivity : AppCompatActivity() {
             useWideViewPort = true
             setSupportZoom(true)
             builtInZoomControls = false
+            // Some hosts/CDNs/WAFs respond differently (or reject) requests carrying
+            // the "; wv" WebView marker that Android appends by default. Presenting
+            // as a normal mobile Chrome browser avoids that class of failures.
+            userAgentString = userAgentString.replace("; wv", "")
         }
 
         webView.webViewClient = WebViewClient()
@@ -44,7 +56,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        webView.loadUrl(getString(R.string.target_url))
+        webView.loadUrl(targetUrl)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
