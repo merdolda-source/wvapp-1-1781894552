@@ -1,3 +1,7 @@
+<?php
+$pageTitle = 'Giriş Yap — CreatorApp24';
+$pageDescription = 'CreatorApp24 hesabınıza giriş yapın ve Android uygulamalarınızı yönetin.';
+?>
 <section class="card auth-card">
     <h1>Giriş Yap</h1>
 

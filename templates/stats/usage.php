@@ -1,4 +1,5 @@
 <?php
+$noIndex = true;
 $max = 1;
 foreach ($monthly as $row) {
     $max = max($max, (int) $row['total']);

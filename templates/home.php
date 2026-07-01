@@ -1,6 +1,10 @@
+<?php
+$pageTitle = 'CreatorApp24 — Web Sitenizi Ücretsiz Android Uygulamasına Dönüştürün';
+$pageDescription = "CreatorApp24 ile web sitenizi birkaç dakikada imzalı Android APK ve AAB uygulamasına dönüştürün, Play Store'a doğrudan yükleyin. Kayıt olun, ikon ve renklerinizi seçin, gerisini bize bırakın. Tamamen ücretsiz.";
+?>
 <section class="hero">
     <h1>Web sitenizi birkaç dakikada Android uygulamasına dönüştürün</h1>
-    <p>Kayıt olun, sitenizin adresini girin, ikon ve renklerinizi seçin. Sistem sizin için imzalı APK ve AAB
+    <p>Kayıt olun, sitenizin adresini girin, ikon ve renklerinizi seçin. CreatorApp24 sizin için imzalı APK ve AAB
         dosyaları üretsin, Play Store'a doğrudan yükleyin. Kullanıcı başına en fazla 5 uygulama, tamamen ücretsiz.</p>
     <div class="hero-actions">
         <a class="btn" href="/register">Ücretsiz Başla</a>
@@ -11,7 +15,7 @@
 <section class="features">
     <div class="feature">
         <h3>Kolay Kurulum</h3>
-        <p>Uygulama adı, ikon, sürüm, üst bar rengi ve açılış (splash) ekranı ayarlarını web arayüzünden yapın.</p>
+        <p>Uygulama adı, ikon, sürüm, durum çubuğu rengi ve açılış (splash) ekranı ayarlarını web arayüzünden yapın.</p>
     </div>
     <div class="feature">
         <h3>İmzalı APK &amp; AAB</h3>

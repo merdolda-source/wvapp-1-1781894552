@@ -1,3 +1,4 @@
+<?php $noIndex = true; ?>
 <section class="page-head">
     <h1>Yeni Uygulama Oluştur</h1>
 </section>

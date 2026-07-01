@@ -1,3 +1,8 @@
+<?php
+$pageTitle = $app['name'] . ' — Gizlilik Politikası';
+$pageDescription = $app['name'] . ' mobil uygulaması gizlilik politikası.';
+$noIndex = true;
+?>
 <section class="page-head">
     <h1>Gizlilik Politikası</h1>
 </section>

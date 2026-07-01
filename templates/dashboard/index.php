@@ -1,3 +1,4 @@
+<?php $noIndex = true; $pageTitle = 'Uygulamalarım — CreatorApp24'; ?>
 <section class="page-head">
     <h1>Uygulamalarım</h1>
     <?php if ($canCreate): ?>

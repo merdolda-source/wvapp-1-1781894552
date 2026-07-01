@@ -16,6 +16,44 @@ $router->get('/', function (): void {
     View::render('home', []);
 });
 
+$router->get('/robots.txt', function (): void {
+    header('Content-Type: text/plain; charset=utf-8');
+    $baseUrl = rtrim((string) Config::get('APP_URL'), '/');
+    echo "User-agent: *\n";
+    echo "Disallow: /dashboard\n";
+    echo "Disallow: /apps/\n";
+    echo "Disallow: /account\n";
+    echo "Disallow: /stats/\n";
+    echo "Disallow: /admin\n";
+    echo "Disallow: /auth/\n";
+    echo "Allow: /\n";
+    if ($baseUrl !== '') {
+        echo "Sitemap: {$baseUrl}/sitemap.xml\n";
+    }
+});
+
+$router->get('/sitemap.xml', function (): void {
+    header('Content-Type: application/xml; charset=utf-8');
+    $baseUrl = rtrim((string) Config::get('APP_URL'), '/');
+
+    $urls = [
+        ['loc' => $baseUrl . '/', 'changefreq' => 'weekly', 'priority' => '1.0'],
+        ['loc' => $baseUrl . '/register', 'changefreq' => 'monthly', 'priority' => '0.8'],
+        ['loc' => $baseUrl . '/login', 'changefreq' => 'monthly', 'priority' => '0.5'],
+    ];
+
+    echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    foreach ($urls as $url) {
+        echo '  <url>' . "\n";
+        echo '    <loc>' . htmlspecialchars($url['loc'], ENT_XML1) . '</loc>' . "\n";
+        echo '    <changefreq>' . $url['changefreq'] . '</changefreq>' . "\n";
+        echo '    <priority>' . $url['priority'] . '</priority>' . "\n";
+        echo '  </url>' . "\n";
+    }
+    echo '</urlset>';
+});
+
 // Public - no login required, so Play Store / users can open it without an account.
 $router->get('/privacy/{packageId}', function (string $packageId): void {
     $app = AppProject::findByPackageId($packageId);
