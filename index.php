@@ -16,6 +16,19 @@ $router->get('/', function (): void {
     View::render('home', []);
 });
 
+// Public - no login required, so Play Store / users can open it without an account.
+$router->get('/privacy/{packageId}', function (string $packageId): void {
+    $app = AppProject::findByPackageId($packageId);
+
+    if ($app === null) {
+        http_response_code(404);
+        View::render('errors/404', []);
+        return;
+    }
+
+    View::render('privacy', ['app' => $app]);
+});
+
 // ---------------------------------------------------------------- Auth
 
 $router->get('/register', function (): void {
@@ -211,7 +224,7 @@ $router->post('/apps', function (): void {
     $fields['icon_path'] = handle_icon_upload();
 
     $app = AppProject::create((int) $user['id'], $fields);
-    Flash::set('success', 'Uygulama oluşturuldu. Şimdi ilk derlemeyi başlatabilirsiniz.');
+    Flash::set('success', 'Uygulama oluşturuldu. Şimdi ilk yayını başlatabilirsiniz.');
     header('Location: /apps/' . $app['id']);
     exit;
 });
@@ -259,7 +272,7 @@ $router->post('/apps/{id}/update', function (string $id): void {
     }
 
     AppProject::update((int) $app['id'], $fields);
-    Flash::set('success', 'Ayarlar kaydedildi. Değişikliklerin uygulamaya yansıması için yeni bir sürüm derleyin.');
+    Flash::set('success', 'Ayarlar kaydedildi. Web adresi, renkler ve splash ayarları birkaç saniye içinde otomatik yansır; uygulama adını veya ikonunu değiştirdiyseniz yeni bir sürüm yayınlamanız gerekir.');
     header('Location: /apps/' . $app['id']);
     exit;
 });
@@ -276,7 +289,7 @@ $router->post('/apps/{id}/build', function (string $id): void {
 
     $service = new GitHubBuildService();
     if (!$service->isConfigured()) {
-        Flash::set('error', 'GitHub bağlantısı yapılandırılmamış. Lütfen .env dosyasındaki GITHUB_* ayarlarını tamamlayın.');
+        Flash::set('error', 'Yayınlama sistemi henüz yapılandırılmamış. Lütfen sunucudaki .env dosyasındaki API ayarlarını tamamlayın.');
         header('Location: /apps/' . $app['id']);
         exit;
     }
@@ -284,7 +297,7 @@ $router->post('/apps/{id}/build', function (string $id): void {
     $isNewVersion = ($app['status'] === 'ready' || $app['status'] === 'failed');
     $service->triggerBuild($app, $isNewVersion);
 
-    Flash::set('success', 'Derleme başlatıldı. Bu birkaç dakika sürebilir, sayfa otomatik olarak güncellenecektir.');
+    Flash::set('success', 'Yayınlama başlatıldı. Bu birkaç dakika sürebilir, sayfa otomatik olarak güncellenecektir.');
     header('Location: /apps/' . $app['id']);
     exit;
 });
@@ -456,6 +469,7 @@ function handle_icon_upload(): ?string
     }
 
     if ($_FILES['icon']['error'] !== UPLOAD_ERR_OK) {
+        Flash::set('error', 'İkon yüklenirken bir hata oluştu (kod: ' . (int) $_FILES['icon']['error'] . ').');
         return null;
     }
 
@@ -473,9 +487,24 @@ function handle_icon_upload(): ?string
         return null;
     }
 
+    $iconsDir = BASE_PATH . '/uploads/icons';
+    if (!is_dir($iconsDir) && !mkdir($iconsDir, 0755, true) && !is_dir($iconsDir)) {
+        Flash::set('error', 'Sunucuda uploads/icons klasörü oluşturulamadı. Dosya izinlerini kontrol edin.');
+        return null;
+    }
+
+    if (!is_writable($iconsDir)) {
+        Flash::set('error', 'uploads/icons klasörüne yazma izni yok. Sunucudaki dosya izinlerini kontrol edin.');
+        return null;
+    }
+
     $filename = bin2hex(random_bytes(16)) . '.' . $allowed[$info['mime']];
-    $destination = BASE_PATH . '/uploads/icons/' . $filename;
-    move_uploaded_file($tmpPath, $destination);
+    $destination = $iconsDir . '/' . $filename;
+
+    if (!move_uploaded_file($tmpPath, $destination)) {
+        Flash::set('error', 'İkon dosyası kaydedilemedi. Sunucudaki dosya izinlerini kontrol edin.');
+        return null;
+    }
 
     return $filename;
 }

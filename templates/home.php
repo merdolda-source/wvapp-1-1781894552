@@ -18,7 +18,8 @@
         <p>Her uygulama için tek bir imzalama anahtarı üretilir ve sonraki tüm sürümlerde otomatik olarak kullanılır.</p>
     </div>
     <div class="feature">
-        <h3>GitHub Actions ile Derleme</h3>
-        <p>Derleme talebiniz GitHub Actions üzerinde otomatik olarak çalışır, dosyalar hazır olunca indirme alanınıza düşer.</p>
+        <h3>Anında Güncelleme</h3>
+        <p>Web adresi, renkler ve splash ayarlarını değiştirdiğinizde kurulu uygulamalara yeniden yayınlamaya
+            gerek kalmadan birkaç saniye içinde yansır.</p>
     </div>
 </section>

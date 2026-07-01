@@ -48,20 +48,17 @@ final class GitHubBuildService
 
         $iconUrl = ($app['icon_path'] && $baseUrl !== '') ? $baseUrl . '/uploads/icons/' . $app['icon_path'] : '';
 
+        // Only what the installed package itself must carry (name, package id,
+        // icon, version, signing) is sent here. Everything else - target URL,
+        // colors, splash text/icon/duration, font - is fetched live by the app
+        // at runtime (see config_base_url / RemoteConfig.kt), so it never has
+        // to leave the database at all.
         $inputs = [
             'build_token' => $buildToken,
             'app_name' => $app['name'],
             'package_id' => $app['package_id'],
-            'target_url' => $app['target_url'],
             'config_base_url' => $baseUrl,
             'icon_url' => $iconUrl,
-            'header_color' => $app['header_color'],
-            'splash_bg_color' => $app['splash_bg_color'],
-            'splash_text_color' => $app['splash_text_color'],
-            'splash_text' => $app['splash_text'],
-            'splash_show_icon' => ((int) $app['splash_show_icon']) === 1 ? 'true' : 'false',
-            'splash_duration_ms' => (string) (((int) $app['splash_duration']) * 1000),
-            'font_name' => $app['font_name'],
             'version_code' => (string) $app['version_code'],
             'version_name' => $app['version_name'],
             'key_alias' => $app['key_alias'],
