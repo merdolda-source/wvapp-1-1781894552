@@ -1,0 +1,181 @@
+name: Build WebView App
+
+run-name: "Build ${{ inputs.app_name }} v${{ inputs.version_name }} (${{ inputs.build_token }})"
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_token:
+        description: "Unique token the PHP backend uses to find this run"
+        required: true
+      app_name:
+        description: "Displayed app name"
+        required: true
+      package_id:
+        description: "Android applicationId, e.g. com.appforge.mystore"
+        required: true
+      target_url:
+        description: "Website URL to load inside the WebView"
+        required: true
+      icon_url:
+        description: "Publicly reachable URL of the app icon (PNG/JPG). Empty = keep placeholder icon."
+        required: false
+        default: ""
+      header_color:
+        description: "Top bar / status bar color, #RRGGBB"
+        required: false
+        default: "#2563EB"
+      splash_bg_color:
+        description: "Splash screen background color, #RRGGBB"
+        required: false
+        default: "#2563EB"
+      splash_text_color:
+        description: "Splash screen text color, #RRGGBB"
+        required: false
+        default: "#FFFFFF"
+      splash_text:
+        description: "Splash screen text"
+        required: false
+        default: ""
+      font_name:
+        description: "One of: default, opensans, montserrat, poppins, lobster, playfair, nunito"
+        required: false
+        default: "default"
+      version_code:
+        description: "Android versionCode (integer, must increase every release)"
+        required: true
+      version_name:
+        description: "Android versionName, e.g. 1.0.0"
+        required: true
+      key_alias:
+        required: true
+      key_password:
+        required: true
+      store_password:
+        required: true
+      keystore_base64:
+        description: "Base64 of an existing release keystore. Empty on first build; the workflow generates one and hands it back so it can be reused for every later version."
+        required: false
+        default: ""
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-template
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.7"
+
+      - name: Prepare keystore (reuse existing or generate once)
+        run: |
+          mkdir -p keystore
+          if [ -n "${{ inputs.keystore_base64 }}" ]; then
+            echo "${{ inputs.keystore_base64 }}" | base64 -d > keystore/release.jks
+          else
+            keytool -genkeypair -v \
+              -keystore keystore/release.jks -alias "${{ inputs.key_alias }}" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "${{ inputs.store_password }}" -keypass "${{ inputs.key_password }}" \
+              -dname "CN=${{ inputs.app_name }}, OU=Mobile, O=AppForge, C=TR"
+          fi
+
+      - name: Prepare app icon
+        if: ${{ inputs.icon_url != '' }}
+        run: |
+          pip install --quiet --disable-pip-version-check pillow
+          curl -sSL --fail --max-time 30 -o /tmp/icon-source "${{ inputs.icon_url }}"
+          python3 - <<'PY'
+          from PIL import Image
+
+          sizes = {
+              "mipmap-mdpi": 48,
+              "mipmap-hdpi": 72,
+              "mipmap-xhdpi": 96,
+              "mipmap-xxhdpi": 144,
+              "mipmap-xxxhdpi": 192,
+          }
+
+          src = Image.open("/tmp/icon-source").convert("RGBA")
+          side = min(src.size)
+          left = (src.width - side) // 2
+          top = (src.height - side) // 2
+          src = src.crop((left, top, left + side, top + side))
+
+          for folder, size in sizes.items():
+              resized = src.resize((size, size), Image.LANCZOS)
+              resized.save(f"app/src/main/res/{folder}/ic_launcher.png")
+              resized.save(f"app/src/main/res/{folder}/ic_launcher_round.png")
+          PY
+
+      - name: Prepare splash/typography font
+        if: ${{ inputs.font_name != '' && inputs.font_name != 'default' }}
+        run: |
+          ls "app/src/main/res/font/${{ inputs.font_name }}.ttf"
+
+      - name: Build release APK
+        env:
+          APP_PACKAGE_ID: ${{ inputs.package_id }}
+          APP_NAME: ${{ inputs.app_name }}
+          APP_TARGET_URL: ${{ inputs.target_url }}
+          APP_HEADER_COLOR: ${{ inputs.header_color }}
+          APP_SPLASH_BG_COLOR: ${{ inputs.splash_bg_color }}
+          APP_SPLASH_TEXT_COLOR: ${{ inputs.splash_text_color }}
+          APP_SPLASH_TEXT: ${{ inputs.splash_text }}
+          APP_FONT_NAME: ${{ inputs.font_name == 'default' && '' || inputs.font_name }}
+          APP_VERSION_CODE: ${{ inputs.version_code }}
+          APP_VERSION_NAME: ${{ inputs.version_name }}
+          KEYSTORE_PASSWORD: ${{ inputs.store_password }}
+          KEY_ALIAS: ${{ inputs.key_alias }}
+          KEY_PASSWORD: ${{ inputs.key_password }}
+        run: gradle assembleRelease --no-daemon
+
+      - name: Build release AAB
+        env:
+          APP_PACKAGE_ID: ${{ inputs.package_id }}
+          APP_NAME: ${{ inputs.app_name }}
+          APP_TARGET_URL: ${{ inputs.target_url }}
+          APP_HEADER_COLOR: ${{ inputs.header_color }}
+          APP_SPLASH_BG_COLOR: ${{ inputs.splash_bg_color }}
+          APP_SPLASH_TEXT_COLOR: ${{ inputs.splash_text_color }}
+          APP_SPLASH_TEXT: ${{ inputs.splash_text }}
+          APP_FONT_NAME: ${{ inputs.font_name == 'default' && '' || inputs.font_name }}
+          APP_VERSION_CODE: ${{ inputs.version_code }}
+          APP_VERSION_NAME: ${{ inputs.version_name }}
+          KEYSTORE_PASSWORD: ${{ inputs.store_password }}
+          KEY_ALIAS: ${{ inputs.key_alias }}
+          KEY_PASSWORD: ${{ inputs.key_password }}
+        run: gradle bundleRelease --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: android-template/app/build/outputs/apk/release/*.apk
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-aab
+          path: android-template/app/build/outputs/bundle/release/*.aab
+          retention-days: 30
+
+      # IMPORTANT: this artifact contains the private signing key. Only ever use
+      # this workflow inside a PRIVATE repository. The PHP backend downloads it
+      # once (via the GitHub API using GITHUB_TOKEN) and stores it in the
+      # database so every later version of this app is signed with the same key.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-keystore
+          path: android-template/keystore/release.jks
+          retention-days: 7
