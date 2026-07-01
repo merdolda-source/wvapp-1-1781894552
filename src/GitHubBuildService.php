@@ -40,9 +40,15 @@ final class GitHubBuildService
 
         $buildToken = bin2hex(random_bytes(8));
 
-        $iconUrl = $app['icon_path']
-            ? rtrim((string) Config::get('APP_URL'), '/') . '/uploads/icons/' . $app['icon_path']
-            : '';
+        // A misconfigured APP_URL (e.g. the .env.example placeholder left in
+        // place) must not take down the whole build - just skip the icon.
+        $iconUrl = '';
+        if ($app['icon_path']) {
+            $baseUrl = rtrim((string) Config::get('APP_URL'), '/');
+            if ($baseUrl !== '' && filter_var($baseUrl, FILTER_VALIDATE_URL)) {
+                $iconUrl = $baseUrl . '/uploads/icons/' . $app['icon_path'];
+            }
+        }
 
         $inputs = [
             'build_token' => $buildToken,
