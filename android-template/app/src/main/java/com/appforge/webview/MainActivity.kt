@@ -9,7 +9,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.webkit.WebSettingsCompat
@@ -29,10 +28,8 @@ class MainActivity : AppCompatActivity() {
         val targetUrl = prefs.getString(RemoteConfig.KEY_TARGET_URL, null)?.takeIf { it.isNotBlank() }
             ?: getString(R.string.target_url)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.title = getString(R.string.app_name)
-        toolbar.setBackgroundColor(headerColor)
-        setSupportActionBar(toolbar)
+        // No native title bar - the wrapped site provides its own header/nav.
+        // Only the system status bar is tinted to match the chosen color.
         window.statusBarColor = headerColor
 
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
