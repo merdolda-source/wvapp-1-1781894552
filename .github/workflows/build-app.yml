@@ -15,8 +15,9 @@ on:
         description: "Android applicationId, e.g. com.appforge.mystore"
         required: true
       target_url:
-        description: "Website URL to load inside the WebView"
-        required: true
+        description: "Website URL to load inside the WebView (fallback only - the real value is fetched live at runtime)"
+        required: false
+        default: "about:blank"
       config_base_url:
         description: "Base URL of the WebView App Builder site (used at runtime to fetch live config updates)"
         required: false
