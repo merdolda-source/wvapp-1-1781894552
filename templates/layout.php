@@ -66,13 +66,44 @@ $canonicalUrl = $baseUrl !== '' ? $baseUrl . $requestPath : '';
 <?php endif; ?>
 </head>
 <body>
-<?php require TEMPLATES_PATH . '/partials/header.php'; ?>
-<main class="container">
-    <?php foreach (Flash::pull() as $flash): ?>
-        <div class="alert alert-<?= View::e($flash['type']) ?>"><?= View::e($flash['message']) ?></div>
-    <?php endforeach; ?>
-    <?= $content ?>
-</main>
-<?php require TEMPLATES_PATH . '/partials/footer.php'; ?>
+<?php if (Auth::check()): ?>
+    <?php require TEMPLATES_PATH . '/partials/sidebar.php'; ?>
+    <div class="app-main">
+        <header class="app-topbar">
+            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Menüyü aç">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <a class="brand" href="/dashboard">CreatorApp24</a>
+        </header>
+        <main class="app-content">
+            <?php foreach (Flash::pull() as $flash): ?>
+                <div class="alert alert-<?= View::e($flash['type']) ?>"><?= View::e($flash['message']) ?></div>
+            <?php endforeach; ?>
+            <?= $content ?>
+        </main>
+    </div>
+    <script>
+    (function () {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        var toggle = document.getElementById('menuToggle');
+        function close() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+        function open() { sidebar.classList.add('open'); overlay.classList.add('open'); }
+        toggle.addEventListener('click', function () {
+            sidebar.classList.contains('open') ? close() : open();
+        });
+        overlay.addEventListener('click', close);
+    })();
+    </script>
+<?php else: ?>
+    <?php require TEMPLATES_PATH . '/partials/header.php'; ?>
+    <main class="container">
+        <?php foreach (Flash::pull() as $flash): ?>
+            <div class="alert alert-<?= View::e($flash['type']) ?>"><?= View::e($flash['message']) ?></div>
+        <?php endforeach; ?>
+        <?= $content ?>
+    </main>
+    <?php require TEMPLATES_PATH . '/partials/footer.php'; ?>
+<?php endif; ?>
 </body>
 </html>
