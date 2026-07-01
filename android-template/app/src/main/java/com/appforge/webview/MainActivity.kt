@@ -1,6 +1,7 @@
 package com.appforge.webview
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebChromeClient
@@ -11,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,6 +37,13 @@ class MainActivity : AppCompatActivity() {
 
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
         webView = findViewById(R.id.webView)
+
+        // Avoid a black flash/strip before the page paints, and stop the
+        // system from algorithmically dark-mode-inverting page content.
+        webView.setBackgroundColor(Color.WHITE)
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+            WebSettingsCompat.setAlgorithmicDarkeningAllowed(webView.settings, false)
+        }
 
         webView.settings.apply {
             javaScriptEnabled = true
