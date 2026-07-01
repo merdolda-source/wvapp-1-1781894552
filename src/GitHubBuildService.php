@@ -107,7 +107,9 @@ final class GitHubBuildService
 
     private function findRunByBuildToken(string $buildToken): ?int
     {
-        $runs = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/actions/workflows/{$this->workflowFile}/runs?per_page=15");
+        // per_page=100 (the API max) gives headroom to still find this run even if
+        // many other apps' builds were dispatched in the same few seconds.
+        $runs = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/actions/workflows/{$this->workflowFile}/runs?per_page=100&event=workflow_dispatch");
 
         foreach ($runs['workflow_runs'] ?? [] as $run) {
             if (str_contains((string) ($run['display_title'] ?? $run['name'] ?? ''), $buildToken)) {
