@@ -1,6 +1,6 @@
 .env
-/public/uploads/icons/*
-!/public/uploads/icons/.gitkeep
+/uploads/icons/*
+!/uploads/icons/.gitkeep
 /storage/builds/*
 !/storage/builds/.gitkeep
 .DS_Store

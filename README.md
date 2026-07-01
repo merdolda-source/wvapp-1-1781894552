@@ -21,14 +21,19 @@ durumunu takip eder ve bitince dosyaları kullanıcının indirme alanına indir
 ## Klasör Yapısı
 
 ```
-public/                 Web kökü (buraya document root ayarlanmalı)
-src/                     PHP uygulama kodu (Auth, Models, GitHubBuildService...)
-templates/               Görünüm dosyaları
-database/schema.sql      MySQL şeması
-android-template/        Derlenecek Android (Kotlin) WebView proje şablonu
-.github/workflows/       GitHub Actions derleme iş akışı (build-app.yml)
-storage/builds/          Üretilen APK/AAB dosyaları (dışarıya kapalı, PHP üzerinden indirilir)
+index.php, .htaccess    Web kökü — bunlar doğrudan public_html'in kendisine gider,
+assets/, uploads/         ayrı bir "public" alt klasörüne ihtiyaç yoktur
+src/                     PHP uygulama kodu (Auth, Models, GitHubBuildService...) — .htaccess ile korunur
+templates/               Görünüm dosyaları — .htaccess ile korunur
+database/schema.sql      MySQL şeması — .htaccess ile korunur
+storage/builds/          Üretilen APK/AAB dosyaları — .htaccess ile korunur, PHP üzerinden indirilir
+android-template/        Derlenecek Android (Kotlin) WebView proje şablonu (yalnızca GitHub'da kalır)
+.github/workflows/       GitHub Actions derleme iş akışı (yalnızca GitHub'da kalır)
 ```
+
+> Not: `android-template/` ve `.github/` klasörlerini hosting'e yüklemenize
+> gerek yok — bunlar sadece GitHub reposunda kalır, derlemeyi GitHub'ın
+> sunucuları yapar. Hosting'e sadece yukarıdaki diğer klasörler + `.env` gider.
 
 ## Kurulum
 
@@ -82,9 +87,14 @@ cp .env.example .env
 
 ### 6. Web sunucusu
 
-Document root'u **`public/`** klasörüne ayarlayın. `public/.htaccess` dosyası
-statik dosyaları (yüklenen ikonlar, CSS/JS) doğrudan sunar, geri kalan her şeyi
-`index.php` üzerinden yönlendirir.
+Bu dosyaları (`index.php`, `.htaccess`, `assets/`, `uploads/`, `src/`,
+`templates/`, `database/`, `storage/`, `.env`) doğrudan hosting'inizin web
+kök klasörüne (`public_html/` veya eşdeğeri) yükleyin — document root'u
+değiştirmenize gerek yok. Kök `.htaccess` dosyası statik dosyaları (yüklenen
+ikonlar, CSS/JS) doğrudan sunar, geri kalan her şeyi `index.php` üzerinden
+yönlendirir. `src/`, `templates/`, `database/`, `storage/` klasörlerinin
+içindeki `.htaccess` dosyaları bu klasörlere tarayıcıdan doğrudan erişimi
+engeller (yalnızca PHP kodu içeriden erişebilir).
 
 ## Derleme Akışı Nasıl Çalışır?
 

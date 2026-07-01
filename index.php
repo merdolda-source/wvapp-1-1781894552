@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../src/bootstrap.php';
+require __DIR__ . '/src/bootstrap.php';
 
 $router = new Router();
 
@@ -423,7 +423,7 @@ function handle_icon_upload(): ?string
     }
 
     $filename = bin2hex(random_bytes(16)) . '.' . $allowed[$info['mime']];
-    $destination = BASE_PATH . '/public/uploads/icons/' . $filename;
+    $destination = BASE_PATH . '/uploads/icons/' . $filename;
     move_uploaded_file($tmpPath, $destination);
 
     return $filename;
