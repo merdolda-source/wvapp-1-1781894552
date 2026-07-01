@@ -90,9 +90,13 @@ jobs:
           if [ -n "${{ inputs.keystore_base64 }}" ]; then
             echo "${{ inputs.keystore_base64 }}" | base64 -d > keystore/release.jks
           else
+            # -storetype JKS is required here: the modern PKCS12 default cannot
+            # have a key password different from the store password (keytool
+            # silently ignores -keypass for PKCS12), which breaks signing since
+            # this project intentionally uses separate store/key passwords.
             keytool -genkeypair -v \
               -keystore keystore/release.jks -alias "${{ inputs.key_alias }}" \
-              -keyalg RSA -keysize 2048 -validity 10000 \
+              -keyalg RSA -keysize 2048 -validity 10000 -storetype JKS \
               -storepass "${{ inputs.store_password }}" -keypass "${{ inputs.key_password }}" \
               -dname "CN=${{ inputs.app_name }}, OU=Mobile, O=AppForge, C=TR"
           fi
