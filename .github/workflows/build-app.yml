@@ -109,9 +109,13 @@ jobs:
         if: ${{ inputs.icon_url != '' }}
         run: |
           pip install --quiet --disable-pip-version-check pillow
-          curl -sSL --fail --max-time 30 -o /tmp/icon-source "${{ inputs.icon_url }}"
-          python3 - <<'PY'
+
+          # A missing/unreachable icon (e.g. deleted from the site by mistake)
+          # must not fail the whole build - just keep the placeholder icon.
+          if curl -sSL --fail --max-time 30 -o /tmp/icon-source "${{ inputs.icon_url }}"; then
+            python3 - <<'PY'
           from PIL import Image
+          import sys
 
           sizes = {
               "mipmap-mdpi": 48,
@@ -121,7 +125,12 @@ jobs:
               "mipmap-xxxhdpi": 192,
           }
 
-          src = Image.open("/tmp/icon-source").convert("RGBA")
+          try:
+              src = Image.open("/tmp/icon-source").convert("RGBA")
+          except Exception as exc:
+              print(f"::warning::Downloaded icon is not a valid image ({exc}); keeping the placeholder icon.")
+              sys.exit(0)
+
           side = min(src.size)
           left = (src.width - side) // 2
           top = (src.height - side) // 2
@@ -132,6 +141,9 @@ jobs:
               resized.save(f"app/src/main/res/{folder}/ic_launcher.png")
               resized.save(f"app/src/main/res/{folder}/ic_launcher_round.png")
           PY
+          else
+            echo "::warning::Could not download icon from the site (${{ inputs.icon_url }}); keeping the placeholder icon for this build."
+          fi
 
       - name: Prepare splash/typography font
         if: ${{ inputs.font_name != '' && inputs.font_name != 'default' }}
